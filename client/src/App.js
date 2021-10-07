@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 const axios = require("axios");
 
 function App() {
-  const [data, setData] = useState({});
+  const [tweets, setTweets] = useState([]);
   const [search, setSearch] = useState("");
 
   function updateSearch(e) {
@@ -11,19 +11,29 @@ function App() {
     console.log(search);
   }
 
-  async function getData() {
-    try {
-      let apiData = (await axios.get(`https://api.agify.io/?name=${search}`))
-        .data;
-      setData(apiData);
-    } catch (e) {
-      console.error(e);
+  useEffect(() => {
+    async function fetch() {
+      try {
+        let apiData = (await axios.get(`http://localhost:3000/api/twitter`))
+          .data;
+        let recieivedTweets = [];
+        apiData.data.forEach((t) => {
+          recieivedTweets.push(t.text);
+        });
+        console.log("ReceivedTweets", recieivedTweets);
+
+        setTweets((prevTweets) => [...prevTweets, recieivedTweets]);
+      } catch (e) {
+        console.error(e.reponse);
+      }
     }
-  }
+    fetch();
+  }, []);
 
   useEffect(() => {
-    getData();
-  }, []);
+    console.log("Tweets updated");
+    console.log(tweets);
+  }, [tweets]);
 
   return (
     <div className="App">
@@ -35,10 +45,10 @@ function App() {
         value={search}
         onChange={(e) => updateSearch(e)}
       />
-      <button onClick={() => getData()}>Search!</button>
-      <h2>Name: {data.name}</h2>
-      <h2>Approx Age: {data.age}</h2>
-      <h2>Count: {data.count}</h2>
+      <button>Search!</button>
+      {tweets.map((value, index) => {
+        return <h3 key={index}>{value}</h3>;
+      })}
     </div>
   );
 }
