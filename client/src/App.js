@@ -13,14 +13,15 @@ function App() {
 
   async function getTweets(search) {
     try {
-      let tweets = await axios.get(
+      console.log("SEARCH", search);
+      let apiData = await axios.get(
         `http://localhost:3000/api/twitter/${search}`
       );
       let recieivedTweets = [];
-      tweets.data.forEach((t) => {
+      apiData.data.data.forEach((t) => {
         recieivedTweets.push(t.text);
       });
-      setTweets((prevTweets) => [...prevTweets, recieivedTweets]);
+      setTweets((prevTweets) => [...prevTweets, ...recieivedTweets]);
     } catch (e) {
       console.error(e.reponse);
     }
@@ -41,7 +42,7 @@ function App() {
         value={search}
         onChange={(e) => updateSearch(e)}
       />
-      <button onClick={() => getTweets(tweets)}>Search!</button>
+      <button onClick={() => getTweets(search)}>Search!</button>
       {tweets.map((value, index) => {
         return <h3 key={index}>{value}</h3>;
       })}
