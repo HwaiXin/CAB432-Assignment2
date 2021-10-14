@@ -21,7 +21,7 @@ function App() {
       apiData.data.data.forEach((t) => {
         recieivedTweets.push(t.text);
       });
-      setTweets((prevTweets) => [...prevTweets, ...recieivedTweets]);
+      setTweets(recieivedTweets);
     } catch (e) {
       console.error(e.reponse);
     }
