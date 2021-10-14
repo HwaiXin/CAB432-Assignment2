@@ -34,6 +34,29 @@ router.get("/", async function (req, res, next) {
   }
 });
 
+router.get("/test", async function (req, res, next) {
+  (async () => {
+    let currentRules;
+
+    try {
+      // Gets the complete list of rules currently applied to the stream
+      currentRules = await getAllRules();
+
+      // Delete all rules. Comment the line below if you want to keep your existing rules.
+      await deleteAllRules(currentRules);
+
+      // Add rules to the stream. Comment the line below if you don't want to add new rules.
+      await setRules();
+    } catch (e) {
+      console.error(e);
+      process.exit(1);
+    }
+
+    // Listen to the stream.
+    streamConnect(0);
+  })();
+});
+
 async function getAllRules() {
   const response = await needle("get", rulesURL, {
     headers: {
@@ -99,9 +122,7 @@ function streamConnect(retryAttempt) {
     timeout: 20000,
   });
 
-  console.log("THIS IS THE STREAM", stream);
-
-  let tweets = [];
+  let tweets = {};
   let counter = 0;
 
   stream
@@ -119,6 +140,7 @@ function streamConnect(retryAttempt) {
           data.detail ===
           "This stream is currently at the maximum allowed connection limit."
         ) {
+          console.log(data);
           console.log(data.detail);
           process.exit(1);
         } else {
@@ -143,26 +165,5 @@ function streamConnect(retryAttempt) {
 
   return stream;
 }
-
-(async () => {
-  let currentRules;
-
-  try {
-    // Gets the complete list of rules currently applied to the stream
-    currentRules = await getAllRules();
-
-    // Delete all rules. Comment the line below if you want to keep your existing rules.
-    await deleteAllRules(currentRules);
-
-    // Add rules to the stream. Comment the line below if you don't want to add new rules.
-    await setRules();
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
-  }
-
-  // Listen to the stream.
-  streamConnect(0);
-})();
 
 module.exports = router;
