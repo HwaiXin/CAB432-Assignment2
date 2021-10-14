@@ -34,6 +34,23 @@ router.get("/", async function (req, res, next) {
   }
 });
 
+/* GET home page. */
+router.get("/:search", async function (req, res, next) {
+  let search = req.params.search;
+  try {
+    let apiData = (
+      await axios.get(
+        `https://api.twitter.com/2/tweets/search/recent?query=${search}`
+      )
+    ).data;
+    console.log(apiData);
+    res.status(200).json(apiData);
+  } catch (e) {
+    console.error(e.response);
+    res.status(400).json(e);
+  }
+});
+
 router.get("/test", async function (req, res, next) {
   (async () => {
     let currentRules;

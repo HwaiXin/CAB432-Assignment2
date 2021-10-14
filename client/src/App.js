@@ -11,24 +11,20 @@ function App() {
     console.log(search);
   }
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        let apiData = (await axios.get(`http://localhost:3000/api/twitter`))
-          .data;
-        let recieivedTweets = [];
-        apiData.data.forEach((t) => {
-          recieivedTweets.push(t.text);
-        });
-        console.log("ReceivedTweets", recieivedTweets);
-
-        setTweets((prevTweets) => [...prevTweets, recieivedTweets]);
-      } catch (e) {
-        console.error(e.reponse);
-      }
+  async function getTweets(search) {
+    try {
+      let tweets = await axios.get(
+        `http://localhost:3000/api/twitter/${search}`
+      );
+      let recieivedTweets = [];
+      tweets.data.forEach((t) => {
+        recieivedTweets.push(t.text);
+      });
+      setTweets((prevTweets) => [...prevTweets, recieivedTweets]);
+    } catch (e) {
+      console.error(e.reponse);
     }
-    fetch();
-  }, []);
+  }
 
   useEffect(() => {
     console.log("Tweets updated");
@@ -45,7 +41,7 @@ function App() {
         value={search}
         onChange={(e) => updateSearch(e)}
       />
-      <button>Search!</button>
+      <button onClick={() => getTweets(tweets)}>Search!</button>
       {tweets.map((value, index) => {
         return <h3 key={index}>{value}</h3>;
       })}
