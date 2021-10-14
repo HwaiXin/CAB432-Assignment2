@@ -51,7 +51,7 @@ router.get("/:search", async function (req, res, next) {
   }
 });
 
-router.get("/test", async function (req, res, next) {
+router.get("/stream/test", async function (req, res, next) {
   (async () => {
     let currentRules;
 
