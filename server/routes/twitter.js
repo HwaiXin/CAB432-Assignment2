@@ -52,26 +52,26 @@ router.get("/:search", async function (req, res, next) {
 });
 
 router.get("/stream/test", async function (req, res, next) {
-  (async () => {
-    let currentRules;
+  let currentRules;
 
-    try {
-      // Gets the complete list of rules currently applied to the stream
-      currentRules = await getAllRules();
+  try {
+    // Gets the complete list of rules currently applied to the stream
+    currentRules = await getAllRules();
 
-      // Delete all rules. Comment the line below if you want to keep your existing rules.
-      await deleteAllRules(currentRules);
+    // Delete all rules. Comment the line below if you want to keep your existing rules.
+    await deleteAllRules(currentRules);
 
-      // Add rules to the stream. Comment the line below if you don't want to add new rules.
-      await setRules();
-    } catch (e) {
-      console.error(e);
-      process.exit(1);
-    }
+    // Add rules to the stream. Comment the line below if you don't want to add new rules.
+    await setRules();
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
 
-    // Listen to the stream.
-    streamConnect(0);
-  })();
+  // Listen to the stream.
+  let tweets = await streamConnect(0);
+
+  res.status(200).json(tweets);
 });
 
 async function getAllRules() {
@@ -130,7 +130,7 @@ async function setRules() {
   return response.body;
 }
 
-function streamConnect(retryAttempt) {
+async function streamConnect(retryAttempt) {
   const stream = needle.get(streamURL, {
     headers: {
       "User-Agent": "v2FilterStreamJS",
@@ -139,25 +139,28 @@ function streamConnect(retryAttempt) {
     timeout: 20000,
   });
 
-  let tweets = {};
+  let tweets = [];
   let counter = 0;
 
-  stream
+  await stream
     .on("data", (data) => {
       try {
         const json = JSON.parse(data);
         tweets.push(json);
         counter++;
-        console.log(json);
+        console.log("TWEETS", tweets);
+        if (counter == 5) {
+          console.log("We should destroy the stream here");
+          stream.destroy();
+          return tweets;
+        }
         // A successful connection resets retry count.
         retryAttempt = 0;
-        if (counter == 5) stream.destroy();
       } catch (e) {
         if (
           data.detail ===
           "This stream is currently at the maximum allowed connection limit."
         ) {
-          console.log(data);
           console.log(data.detail);
           process.exit(1);
         } else {
@@ -179,8 +182,6 @@ function streamConnect(retryAttempt) {
         }, 2 ** retryAttempt);
       }
     });
-
-  return stream;
 }
 
 module.exports = router;
