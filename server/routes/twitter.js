@@ -46,10 +46,9 @@ router.get("/:search", async function (req, res, next) {
   try {
     let apiData = (
       await axios.get(
-        `https://api.twitter.com/2/tweets/search/recent?query=${search} lang:en has:images`
+        `https://api.twitter.com/2/tweets/search/recent?query=${search} lang:en`
       )
     ).data.data;
-    console.log(apiData);
     apiData.forEach((tweet) => {
       let text = tweet.text; // Get text from returned tweet
       // Scores scale from -5 to +5
@@ -57,16 +56,32 @@ router.get("/:search", async function (req, res, next) {
       if (text != undefined && score != undefined) {
         results.push({
           text,
-          score,
+          score: scoreToString(score),
+          scoreNum: score
         });
       }
     });
+    console.log(results)
     res.status(200).json(results);
   } catch (e) {
     console.error(e.response);
     res.status(400).json(e);
   }
 });
+
+function scoreToString(score) {
+  if (score >= -0.25 && score <= 0.25) {
+    return "Neutral"
+  } else if (score < -0.25 && score >= -1) {
+    return "Negative"
+  } else if (score < -1) {
+    return "Extremently negative"
+  } else if (score > 0.25 && score <= 1) {
+    return "Positive"
+  } else {
+    return "Extremetly Positive"
+  }
+}
 
 router.get("/stream/test", async function (req, res, next) {
   let currentRules;

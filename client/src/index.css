@@ -1,3 +1,10 @@
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Georama:ital,wght@1,500&family=Hind+Siliguri&display=swap');
+/* Variables */
+:root {
+  --twitter-blue: #1DA1F2;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,9 +12,94 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: 'Hind Siliguri', sans-serif;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+h1 {
+  font-family: 'Georama', sans-serif;
+  font-size: 3.2rem;
+  color: var(--twitter-blue);
 }
+
+.content {
+  margin: auto;
+  width: 70%;
+}
+
+/* Search */
+.search {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 400px;
+  margin: auto;
+}
+
+.search label {
+  align-self: flex-start;
+  font-size: 1.2rem;
+}
+
+.searchInner {
+  display: flex;
+  justify-content: space-between;
+}
+
+input {
+  margin: 1rem 0;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-family: 'Hind Siliguri', sans-serif;
+  font-size: 1.3rem;
+  width: 80%;
+}
+
+input:focus {
+  outline: none;
+  border-left: 5px solid var(--twitter-blue);
+}
+
+button {
+  color: #fff;
+  background-color: var(--twitter-blue);
+  margin: 1rem 0;
+  padding: 1rem;
+  font-size: 1.5rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+/* Tweets */
+.tweet {
+  text-align: left;
+}
+
+/* Helper Styles */
+.neutral {
+  color: #3366ff;
+}
+
+.negative {
+  color: red;
+}
+
+.positive {
+  color: green;
+}
+
+.extremelyNegative {
+  color: purple;
+}
+
+.extremelyPositive {
+  color: teal;
+}
+
+.fa-twitter {
+  color: var(--twitter-blue);
+} 
