@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "natural": "^5.1.1",
+    "react-chartjs-2": "^3.3.0"
+  }
+}

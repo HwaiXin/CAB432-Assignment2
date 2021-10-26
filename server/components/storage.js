@@ -14,8 +14,8 @@ redisClient.on('error', (err) => {
   console.log("Error " + err);
 });
 
-//Function that checks if key exists in Redis/S3, if not then return null
-function checkStorage(key) {
+//Function that checks if key exists in Redis/S3, return null if not stored anywhere
+export default function checkStorage(key) {
   const params = { Bucket: bucketName, Key: key};
 
   //Check redis for cache key
@@ -43,6 +43,7 @@ function checkStorage(key) {
         //If key has not been stored anywhere
         else 
         {
+          return null;
           // Serve directly from Twitter API and store
           //-------CHANGE THIS PART--------//
           return axios.get(searchUrl)
