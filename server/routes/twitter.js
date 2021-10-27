@@ -2,6 +2,9 @@ var express = require("express");
 var router = express.Router();
 const axios = require("axios");
 var needle = require("needle");
+var storage = require("../components/storage");
+const redis = require("redis");
+var AWS = require("aws-sdk");
 
 var natural = require("natural");
 var Analyzer = natural.SentimentAnalyzer;
@@ -12,7 +15,6 @@ var analyzer = new Analyzer("English", stemmer, "afinn");
 axios.defaults.headers.common = {
   authorization: `Bearer ${process.env.TWITTER_BEARER}`,
 };
-axios.defaults.timeout = 1000;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL = "https://api.twitter.com/2/tweets/search/stream";
@@ -43,44 +45,76 @@ router.get("/", async function (req, res, next) {
 /* GET home page. */
 router.get("/:search", async function (req, res, next) {
   let { search } = req.params;
-  let apiData;
   let results = [];
-  try {
-    await axios
-      .get(
-        `https://api.twitter.com/2/tweets/search/recent?query=${search} lang:en&tweet.fields=created_at`,
-        { timeout: 7000 }
-      )
-      .then((response) => {
-        apiData = response.data.data;
-      })
-      .catch((error) => {
-        console.log(error);
-        return res.status(400).json({
-          error: true,
-          message: "Server timeout. No tweets match this query.",
-        });
+  const params = { Bucket: storage.bucketName, Key: search };
+
+  // Serve directly from Twitter API and store in Redis and S3
+  return axios
+    .get(
+      `https://api.twitter.com/2/tweets/search/recent?query=${search} lang:en&tweet.fields=created_at`
+    )
+    .then((response) => {
+      const apiData = response.data.data;
+
+      apiData.forEach((tweet) => {
+        let text = tweet.text; // Get text from returned tweet
+        let created_at = tweet.created_at; // Get ISO creation date
+        // Scores scale from -5 to +5
+        let score = analyzer.getSentiment(text.split(" ")); // Get sentiment score. Split string into word array.
+        if (text != undefined && score != undefined) {
+          results.push({
+            text,
+            score,
+            scoreText: scoreToString(score),
+            created_at,
+          });
+        }
       });
-    apiData.forEach((tweet) => {
-      let text = tweet.text; // Get text from returned tweet
-      let created_at = tweet.created_at; // Get ISO creation date
-      // Scores scale from -5 to +5
-      let score = analyzer.getSentiment(text.split(" ")); // Get sentiment score. Split string into word array.
-      if (text != undefined && score != undefined) {
-        results.push({
-          text,
-          score,
-          scoreText: scoreToString(score),
-          created_at,
-        });
-      }
+
+      //Check redis for key
+      storage.redisClient.get(search, (err, result) => {
+        //If that key exist
+        if (result) {
+          //Serve data from Redis along with current data
+          const json = JSON.parse(result);
+          const resultJSON = json.data.concat(results);
+          //Store new data
+          storage.storeRedis(search, resultJSON);
+          storage.storeS3(search, resultJSON);
+          res.status(200).json(resultJSON);
+        } else {
+          console.log("CHECK S3");
+          // Check S3 bucket
+          new AWS.S3({ apiVersion: "2006-03-01" }).getObject(
+            params,
+            (err, result) => {
+              // If key exists
+              if (result) {
+                // Serve from S3
+                const json = JSON.parse(result.Body);
+                const resultJSON = json.data.concat(results);
+                //Store new data
+                storage.storeRedis(search, resultJSON);
+                storage.storeS3(search, resultJSON);
+                res.status(200).json(resultJSON);
+              }
+              //If key has not been stored anywhere
+              else {
+                console.log("DATA ONLY FROM API");
+                console.log(results);
+                //Store new data
+                storage.storeRedis(search, results);
+                storage.storeS3(search, results);
+                res.status(200).json(results);
+              }
+            }
+          );
+        }
+      });
+    })
+    .catch((err) => {
+      return res.json(err);
     });
-    console.log("Results", results);
-    return res.status(200).json(results);
-  } catch (e) {
-    console.error(e.response);
-    return res.status(400).json(e);
-  }
 });
 
 function scoreToString(score) {
