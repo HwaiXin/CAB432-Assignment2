@@ -46,22 +46,24 @@ router.get("/:search", async function (req, res, next) {
   try {
     let apiData = (
       await axios.get(
-        `https://api.twitter.com/2/tweets/search/recent?query=${search} lang:en`
+        `https://api.twitter.com/2/tweets/search/recent?query=${search} lang:en&tweet.fields=created_at`
       )
     ).data.data;
     apiData.forEach((tweet) => {
       let text = tweet.text; // Get text from returned tweet
+      let created_at = tweet.created_at; // Get ISO creation date
       // Scores scale from -5 to +5
       let score = analyzer.getSentiment(text.split(" ")); // Get sentiment score. Split string into word array.
       if (text != undefined && score != undefined) {
         results.push({
           text,
           score,
-          scoreText: scoreToString(score)
+          scoreText: scoreToString(score),
+          created_at,
         });
       }
     });
-    console.log(results)
+    console.log(results);
     res.status(200).json(results);
   } catch (e) {
     console.error(e.response);
@@ -71,15 +73,15 @@ router.get("/:search", async function (req, res, next) {
 
 function scoreToString(score) {
   if (score >= -0.25 && score <= 0.25) {
-    return "Neutral"
+    return "Neutral";
   } else if (score < -0.25 && score >= -1) {
-    return "Negative"
+    return "Negative";
   } else if (score < -1) {
-    return "Extremently Negative"
+    return "Extremently Negative";
   } else if (score > 0.25 && score <= 1) {
-    return "Positive"
+    return "Positive";
   } else {
-    return "Extremetly Positive"
+    return "Extremetly Positive";
   }
 }
 
