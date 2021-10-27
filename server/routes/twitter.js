@@ -12,6 +12,7 @@ var analyzer = new Analyzer("English", stemmer, "afinn");
 axios.defaults.headers.common = {
   authorization: `Bearer ${process.env.TWITTER_BEARER}`,
 };
+axios.defaults.timeout = 1000;
 
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL = "https://api.twitter.com/2/tweets/search/stream";
@@ -42,13 +43,24 @@ router.get("/", async function (req, res, next) {
 /* GET home page. */
 router.get("/:search", async function (req, res, next) {
   let { search } = req.params;
+  let apiData;
   let results = [];
   try {
-    let apiData = (
-      await axios.get(
-        `https://api.twitter.com/2/tweets/search/recent?query=${search} lang:en&tweet.fields=created_at`
+    await axios
+      .get(
+        `https://api.twitter.com/2/tweets/search/recent?query=${search} lang:en&tweet.fields=created_at`,
+        { timeout: 7000 }
       )
-    ).data.data;
+      .then((response) => {
+        apiData = response.data.data;
+      })
+      .catch((error) => {
+        console.log(error);
+        return res.status(400).json({
+          error: true,
+          message: "Server timeout. No tweets match this query.",
+        });
+      });
     apiData.forEach((tweet) => {
       let text = tweet.text; // Get text from returned tweet
       let created_at = tweet.created_at; // Get ISO creation date
@@ -63,11 +75,11 @@ router.get("/:search", async function (req, res, next) {
         });
       }
     });
-    console.log(results);
-    res.status(200).json(results);
+    console.log("Results", results);
+    return res.status(200).json(results);
   } catch (e) {
     console.error(e.response);
-    res.status(400).json(e);
+    return res.status(400).json(e);
   }
 });
 
@@ -77,11 +89,11 @@ function scoreToString(score) {
   } else if (score < -0.25 && score >= -1) {
     return "Negative";
   } else if (score < -1) {
-    return "Extremently Negative";
+    return "Extremely Negative";
   } else if (score > 0.25 && score <= 1) {
     return "Positive";
   } else {
-    return "Extremetly Positive";
+    return "Extremely Positive";
   }
 }
 

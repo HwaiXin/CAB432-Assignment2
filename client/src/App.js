@@ -1,13 +1,16 @@
-import "./App.css";
 import { useState, useEffect } from "react";
 import LineChart from "./components/LineChart";
 import Loader from "./components/Loader";
 const axios = require("axios");
 
+let apiData;
+
 function App() {
   const [tweets, setTweets] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [errMsg, setErrMsg] = useState("No tweets match this query");
 
   function updateSearch(e) {
     setSearch(e.target.value); // Set search to input value
@@ -15,17 +18,23 @@ function App() {
 
   async function getTweets(search) {
     try {
+      setError(false);
       setLoading(true);
-      let apiData = (await axios.get(
-        `http://localhost:3000/api/twitter/${search}`
-      )).data;
-      console.log('ApiData', apiData)
+      await axios
+        .get(`http://localhost:3000/api/twitter/${search}`)
+        .then((response) => {
+          apiData = response.data;
+        })
+        .catch((error) => {
+          setError(true);
+        });
+      if (apiData === undefined) return;
       let recieivedTweets = [];
       apiData.forEach((t) => {
         recieivedTweets.push({
           text: t.text,
           score: t.score,
-          scoreText: t.scoreText
+          scoreText: t.scoreText,
         });
       });
       setTweets(recieivedTweets);
@@ -37,7 +46,7 @@ function App() {
 
   function toCamelCase(string) {
     let str = string.charAt(0).toLowerCase() + string.slice(1);
-    return str.replace(/\s/g, '');
+    return str.replace(/\s/g, "");
   }
 
   function getData() {
@@ -45,11 +54,11 @@ function App() {
       labels: tweets.map((t, index) => ++index),
       datasets: [
         {
-          label: 'Tweet Analysis',
+          label: "Tweet Analysis",
           data: tweets.map((t) => t.score),
           fill: false,
-          backgroundColor: '#1DA1F2',
-          borderColor: '#1DA1F2',
+          backgroundColor: "#1DA1F2",
+          borderColor: "#1DA1F2",
         },
       ],
     };
@@ -57,7 +66,7 @@ function App() {
 
   useEffect(() => {
     console.log("Tweets updated");
-    console.log('Tweets', tweets);
+    console.log("Tweets", tweets);
   }, [tweets]);
 
   return (
@@ -73,11 +82,15 @@ function App() {
             value={search}
             onChange={(e) => updateSearch(e)}
           />
-          <button onClick={() => getTweets(search)}><i className="fas fa-search"></i></button>
+          <button onClick={() => getTweets(search)}>
+            <i className="fas fa-search"></i>
+          </button>
         </div>
       </div>
 
-      {loading ? (
+      {error ? (
+        <h2>{errMsg}</h2>
+      ) : loading ? (
         <Loader />
       ) : (
         <div className="content">
@@ -91,8 +104,15 @@ function App() {
             {tweets.map((tweet, index) => {
               return (
                 <div key={index} className="tweet">
-                  <h3><i class="fab fa-twitter"></i> {tweet.text}</h3>
-                  <h4>Score: <span className={toCamelCase(tweet.scoreText)}>{tweet.scoreText}</span></h4>
+                  <h3>
+                    <i class="fab fa-twitter"></i> {tweet.text}
+                  </h3>
+                  <h4>
+                    Score:{" "}
+                    <span className={toCamelCase(tweet.scoreText)}>
+                      {tweet.scoreText}
+                    </span>
+                  </h4>
                   <hr />
                 </div>
               );
@@ -100,7 +120,6 @@ function App() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
