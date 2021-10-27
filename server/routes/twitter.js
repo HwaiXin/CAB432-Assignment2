@@ -56,8 +56,8 @@ router.get("/:search", async function (req, res, next) {
       if (text != undefined && score != undefined) {
         results.push({
           text,
-          score: scoreToString(score),
-          scoreNum: score
+          score,
+          scoreText: scoreToString(score)
         });
       }
     });
@@ -75,7 +75,7 @@ function scoreToString(score) {
   } else if (score < -0.25 && score >= -1) {
     return "Negative"
   } else if (score < -1) {
-    return "Extremently negative"
+    return "Extremently Negative"
   } else if (score > 0.25 && score <= 1) {
     return "Positive"
   } else {
