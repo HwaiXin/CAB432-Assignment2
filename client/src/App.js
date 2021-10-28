@@ -10,7 +10,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [errMsg, setErrMsg] = useState("No tweets match this query");
+  const [errMsg, setErrMsg] = useState("");
 
   // Run on input change
   function updateSearch(e) {
@@ -29,9 +29,11 @@ function App() {
         })
         .catch((error) => {
           console.log("Err", error);
+          setErrMsg("No tweets match this query");
           setError(true);
         });
       if (Object.keys(apiData).length === 0) {
+        setErrMsg("No tweets match this query");
         setError(true);
         setLoading(false);
         return;
@@ -89,7 +91,15 @@ function App() {
             value={search}
             onChange={(e) => updateSearch(e)}
           />
-          <button onClick={() => getTweets(search)}>
+          <button onClick={() => {
+            if (search == "" || search.trim() === ''){
+              setErrMsg("Please enter something into the search bar!");
+              setError(true);
+            }
+            else{
+              getTweets(search)
+            }
+            }}>
             <i className="fas fa-search"></i>
           </button>
         </div>
