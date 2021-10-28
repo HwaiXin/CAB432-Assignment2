@@ -7,7 +7,19 @@ const options = {
   scales: {
     y: {
       beginAtZero: true,
+      display: true,
+      title: {
+        display: true,
+        text: 'Sentiment Score'
+      }
     },
+    x: {
+      display: true,
+      title: {
+        display: true,
+        text: 'Tweets'
+      }
+    }
   },
 };
 
