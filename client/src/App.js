@@ -29,11 +29,11 @@ function App() {
         })
         .catch((error) => {
           console.log("Err", error);
-          setErrMsg("No tweets match this query");
+          setErrMsg("Tweets could not be retrieved.");
           setError(true);
         });
       if (Object.keys(apiData).length === 0) {
-        setErrMsg("No tweets match this query");
+        setErrMsg("No tweets matched this query.");
         setError(true);
         setLoading(false);
         return;
@@ -83,16 +83,16 @@ function App() {
       <h1>Twitter Sentiment Analysis</h1>
       {/* Search */}
       <div className="search">
-        <label htmlFor="query">Enter a Keyword</label>
         <div className="searchInner">
           <input
             name="query"
             type="text"
+            placeholder="Enter a keyword..."
             value={search}
             onChange={(e) => updateSearch(e)}
           />
           <button onClick={() => {
-            if (search == "" || search.trim() === ''){
+            if (search == null || search.trim() === ''){
               setErrMsg("Please enter something into the search bar!");
               setError(true);
             }
