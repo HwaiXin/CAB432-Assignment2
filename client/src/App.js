@@ -12,23 +12,30 @@ function App() {
   const [error, setError] = useState(false);
   const [errMsg, setErrMsg] = useState("No tweets match this query");
 
+  // Run on input change
   function updateSearch(e) {
     setSearch(e.target.value); // Set search to input value
   }
 
+  // Retrieves tweets from API. Passes input string as param.
   async function getTweets(search) {
     try {
       setError(false);
       setLoading(true);
       await axios
-        .get(`http://localhost:3000/api/twitter/${search}`)
+        .get(`/api/twitter/${search}`)
         .then((response) => {
           apiData = response.data;
         })
         .catch((error) => {
+          console.log("Err", error);
           setError(true);
         });
-      if (apiData === undefined) return;
+      if (Object.keys(apiData).length === 0) {
+        setError(true);
+        setLoading(false);
+        return;
+      }
       let recieivedTweets = [];
       apiData.forEach((t) => {
         recieivedTweets.push({
@@ -44,11 +51,13 @@ function App() {
     }
   }
 
+  // Convert Score Text from Tweet object to camelCase. Used for applying css styles to score text. E.g., Neutral, Positive, etc.
   function toCamelCase(string) {
     let str = string.charAt(0).toLowerCase() + string.slice(1);
     return str.replace(/\s/g, "");
   }
 
+  // Returns data object in required format for React ChartJS Line Chart
   function getData() {
     return {
       labels: tweets.map((t, index) => ++index),
@@ -64,10 +73,8 @@ function App() {
     };
   }
 
-  useEffect(() => {
-    console.log("Tweets updated");
-    console.log("Tweets", tweets);
-  }, [tweets]);
+  // Update UI each time tweets state is updated
+  useEffect(() => {}, [tweets]);
 
   return (
     <div className="App">
@@ -88,11 +95,14 @@ function App() {
         </div>
       </div>
 
+      {/* Print Error to screen if query yields no results. */}
       {error ? (
         <h2>{errMsg}</h2>
-      ) : loading ? (
+      ) : // If loading state, dispaly Loader component
+      loading ? (
         <Loader />
       ) : (
+        // If no error and not loading, show content - Line Graph and Tweets
         <div className="content">
           {/* Line Chart */}
           <div className="chart">

@@ -1,7 +1,6 @@
 var express = require("express");
 var router = express.Router();
 const axios = require("axios");
-var needle = require("needle");
 var storage = require("../components/storage");
 const redis = require("redis");
 var AWS = require("aws-sdk");
@@ -16,23 +15,9 @@ axios.defaults.headers.common = {
   authorization: `Bearer ${process.env.TWITTER_BEARER}`,
 };
 
-/* GET home page. */
-router.get("/", async function (req, res, next) {
-  try {
-    let apiData = (
-      await axios.get(
-        `https://api.twitter.com/2/tweets/search/recent?query=from:twitterdev`
-      )
-    ).data;
-    console.log(apiData);
-    res.status(200).json(apiData);
-  } catch (e) {
-    console.error(e.response);
-    res.status(400).json(e);
-  }
-});
-
-/* GET home page. */
+/* GET Request */
+// Params: search - Search query to send to Twitter API.
+// Returns array of objects. Includes tweet, sentiment score, sentiment score as text and created date
 router.get("/:search", async function (req, res, next) {
   let { search } = req.params;
   let results = [];
