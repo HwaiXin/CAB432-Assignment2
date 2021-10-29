@@ -110,6 +110,14 @@ hr {
   border: 1px solid #ccc;
 }
 
+/* Scores */
+.scores {
+  margin: auto;
+  width: 60%;
+  display: flex;
+  justify-content: space-between;
+}
+
 /* Helper Styles */
 .fl {
   display: flex;
