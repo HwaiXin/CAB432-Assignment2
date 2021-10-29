@@ -102,7 +102,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Twitter Sentiment Analysis</h1>
+      <h1 className="title">Twitter Sentiment Analysis</h1>
       {/* Search */}
       <div className="search">
         <div className="searchInner">
@@ -127,12 +127,6 @@ function App() {
         </div>
       </div>
 
-      <div className="scores">
-            <h1>Negative <span className="negative">{negative}%</span></h1>
-            <h1>Neutral <span className="neutral">{neutral}%</span></h1>
-            <h1>Positive <span className="positive">{positive}%</span></h1>
-          </div>
-
       {/* Print Error to screen if query yields no results. */}
       {error ? (
         <h2>{errMsg}</h2>
@@ -142,29 +136,37 @@ function App() {
         ) : (
           // If no error and not loading, show content - Line Graph and Tweets
           <div className="content">
-            {/* Line Chart */}
-            <div className="chart">
-              <LineChart data={getData} />
+            <div className="scores">
+              <h2 className="sub-heading">Negative <span className="negative">{negative}%</span></h2>
+              <h2 className="sub-heading">Neutral <span className="neutral">{neutral}%</span></h2>
+              <h2 className="sub-heading">Positive <span className="positive">{positive}%</span></h2>
             </div>
-            <div className="tweetBox">
-              <h1>Twitter Feed</h1>
-              {/* Tweets */}
-              {tweets.map((tweet, index) => {
-                return (
-                  <div key={index} className="tweet">
-                    <h3>
-                      <i class="fab fa-twitter"></i> {tweet.text}
-                    </h3>
-                    <h4>
-                      Score:{" "}
-                      <span className={toCamelCase(tweet.scoreText)}>
-                        {tweet.scoreText}
-                      </span>
-                    </h4>
-                    <hr />
-                  </div>
-                );
-              })}
+
+            <div className="horizontal-content">
+              {/* Line Chart */}
+              <div className="chart">
+                <LineChart data={getData} />
+              </div>
+              <div className="tweetBox">
+                <h2 className="sub-heading">Twitter Feed</h2>
+                {/* Tweets */}
+                {tweets.map((tweet, index) => {
+                  return (
+                    <div key={index} className="tweet">
+                      <h3>
+                        <i class="fab fa-twitter"></i> {tweet.text}
+                      </h3>
+                      <h4>
+                        Score:{" "}
+                        <span className={toCamelCase(tweet.scoreText)}>
+                          {tweet.scoreText}
+                        </span>
+                      </h4>
+                      <hr />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}

@@ -17,21 +17,28 @@ body {
   overflow-y: hidden;
 }
 
-h1 {
+.title, .sub-heading {
   font-family: "Georama", sans-serif;
-  font-size: 3.2rem;
   color: var(--twitter-blue);
   margin: 8px 0;
+}
+
+.title {
+  font-size: 3.2rem;
+}
+
+.sub-heading {
+  font-size: 2.8rem;
 }
 
 .App {
   text-align: center;
 }
 
-.content {
-  margin: auto;
+.horizontal-content {
+  margin: 10px auto auto auto;
   width: 95%;
-  height: 75vh;
+  height: 70vh;
   display: flex;
 }
 
@@ -100,6 +107,7 @@ Line {
   border-radius: 3px;
   overflow: auto;
   max-width: 32%;
+  max-height: fit-content;
 }
 
 .tweet {
@@ -112,7 +120,7 @@ hr {
 
 /* Scores */
 .scores {
-  margin: auto;
+  margin: 10px auto auto auto;
   width: 60%;
   display: flex;
   justify-content: space-between;

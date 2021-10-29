@@ -26,7 +26,7 @@ const options = {
 const LineChart = (props) => (
   <div>
     <div className="header">
-      <h1 className="title">Sentiment Analysis</h1>
+      <h1 className="sub-heading">Sentiment Analysis</h1>
     </div>
     <Line data={props.data} options={options} />
   </div>
